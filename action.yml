@@ -14,7 +14,7 @@ inputs:
 runs:
   using: 'composite'
   steps:
-  - if: github.event_name == "pull_request"
+  - if: github.event_name == 'pull_request'
     run: exit 1
     shell: bash
   - run: |
