@@ -19,6 +19,8 @@ runs:
     shell: bash
     id: check
     env:
+      GITHUB_REPOSITORY: ${{ github.repository }}
+      GITHUB_REF: ${{ github.ref }}
       GITHUB_TOKEN: ${{ inputs.github-token }}
       TERRAFORM_DIR: ${{ inputs.terraform-directory }}
   - uses: actions/download-artifact@v3
