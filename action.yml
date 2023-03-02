@@ -17,15 +17,16 @@ runs:
   - run: |
       set -x
       [[ "$GITHUB_EVENT_NAME" == "pull_request" ]] || exit 1
-      pr_number=$(echo "$GITHUB_REF" | cut -d '/' -f3)
-      gh pr -R "${GITHUB_REPOSITORY}" view "${pr_number}" --json files --jq '.files.[].path' \
-        | grep -qv "^${TFDIR}" && echo "skip=true"|| echo "skip=false" >> $GITHUB_OUTPUT
+      PR_NUMBER=$(echo "$GITHUB_REF" | cut -d '/' -f3)
+      # limited to 100 file changes fix: https://github.com/cli/cli/issues/1393
+      gh pr -R "${GITHUB_REPOSITORY}" view "${PR_NUMBER}" --json files --jq '.files.[].path' \
+        | grep -qv "^${TERRAFORM_DIR}" && echo "skip=true"|| echo "skip=false" >> $GITHUB_OUTPUT
     shell: bash
     id: check
     env:
       GITHUB_EVENT_NAME: ${{ github.event_name }}
       GITHUB_TOKEN: ${{ inputs.github-token }}
-      TFDIR: ${{ inputs.terraform-directory }}
+      TERRAFORM_DIR: ${{ inputs.terraform-directory }}
   - uses: actions/download-artifact@v3
     if: steps.check.outputs.skip == 'false' # don't fail
     with:
@@ -40,8 +41,9 @@ runs:
     with:
       github-token: ${{ inputs.github-token }}
   - run: |
-      pr_number=$(echo "$GITHUB_REF" | cut -d '/' -f3)
-      gh pr -R "${GITHUB_REPOSITORY}" merge "${pr_number}" --admina -s
+      PR_NUMBER=$(echo "$GITHUB_REF" | cut -d '/' -f3)
+      gh pr -R "${GITHUB_REPOSITORY}" merge "${PR_NUMBER}" --admin -s
     shell: bash
+    if: inputs.merge == true && steps.check.outputs.skip == 'false'
     env:
       GITHUB_TOKEN: ${{ inputs.github-token }}
