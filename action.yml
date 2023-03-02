@@ -7,13 +7,13 @@ inputs:
 runs:
   using: 'composite'
   steps:
-    - uses: actions/download-artifact@v3
-        with:
-          name: terraform
-          path: summary
-    - id: summary
-      run: cat summary/terraform/*.summary | grep 'true' || echo "has_changes=false" >> $GITHUB_OUTPUT
-    - uses: hmarr/auto-approve-action@v3
-      if: steps.summary.outputs.has_changes == 'false'
-      with:
-        github-token: ${{ inputs.github-token }}
+  - uses: actions/download-artifact@v3
+    with:
+      name: terraform
+      path: summary
+  - id: summary
+    run: cat summary/terraform/*.summary | grep 'true' || echo "has_changes=false" >> $GITHUB_OUTPUT
+  - uses: hmarr/auto-approve-action@v3
+    if: steps.summary.outputs.has_changes == 'false'
+    with:
+      github-token: ${{ inputs.github-token }}
