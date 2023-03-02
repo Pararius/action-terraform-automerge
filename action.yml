@@ -16,6 +16,7 @@ runs:
   steps:
   - if: github.event_name == "pull_request"
     run: exit 1
+    shell: bash
   - run: |
       PR_NUMBER=$(echo "$GITHUB_REF" | cut -d '/' -f3)
       # https://github.com/cli/cli/issues/1393
@@ -40,10 +41,10 @@ runs:
     if: inputs.merge == false && steps.check.outputs.skip == 'false' && steps.summary.outputs.has_changes == 'false'
     with:
       github-token: ${{ inputs.github-token }}
-  - run: |
+  - if: inputs.merge == true && steps.check.outputs.skip == 'false'
+    run: |
       PR_NUMBER=$(echo "$GITHUB_REF" | cut -d '/' -f3)
       gh pr -R "${GITHUB_REPOSITORY}" merge "${PR_NUMBER}" --admin -s
     shell: bash
-    if: inputs.merge == true && steps.check.outputs.skip == 'false'
     env:
       GITHUB_TOKEN: ${{ inputs.github-token }}
