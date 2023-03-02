@@ -7,6 +7,10 @@ inputs:
   terraform-directory:
     description: 'Root directory for the terraform files'
     required: true
+  merge:
+    description: 'Enable auto-merging instead (provided token needs admin access)'
+    required: false
+    default: false
 runs:
   using: 'composite'
   steps:
@@ -15,15 +19,13 @@ runs:
       [[ "$GITHUB_EVENT_NAME" == "pull_request" ]] || exit 1
       pr_number=$(echo "$GITHUB_REF" | cut -d '/' -f3)
       gh pr -R "${GITHUB_REPOSITORY}" view "${pr_number}" --json files --jq '.files.[].path' \
-        | grep -qv "^${TERRAFORM_DIR}" && echo "skip=true"|| echo "skip=false" >> $GITHUB_OUTPUT
+        | grep -qv "^${TFDIR}" && echo "skip=true"|| echo "skip=false" >> $GITHUB_OUTPUT
     shell: bash
     id: check
     env:
       GITHUB_EVENT_NAME: ${{ github.event_name }}
-      GITHUB_REPOSITORY: ${{ github.repository }}
-      GITHUB_REF: ${{ github.ref }}
       GITHUB_TOKEN: ${{ inputs.github-token }}
-      TERRAFORM_DIR: ${{ inputs.terraform-directory }}
+      TFDIR: ${{ inputs.terraform-directory }}
   - uses: actions/download-artifact@v3
     if: steps.check.outputs.skip == 'false' # don't fail
     with:
@@ -34,6 +36,12 @@ runs:
     shell: bash
     run: cat summary/terraform/*.summary | grep 'true' || echo "has_changes=false" >> $GITHUB_OUTPUT
   - uses: hmarr/auto-approve-action@v3
-    if: steps.bheck.outputs.skip == 'false' && steps.summary.outputs.has_changes == 'false'
+    if: inputs.merge == false && steps.check.outputs.skip == 'false' && steps.summary.outputs.has_changes == 'false'
     with:
       github-token: ${{ inputs.github-token }}
+  - run: |
+      pr_number=$(echo "$GITHUB_REF" | cut -d '/' -f3)
+      gh pr -R "${GITHUB_REPOSITORY}" merge "${pr_number}" --admina -s
+    shell: bash
+    env:
+      GITHUB_TOKEN: ${{ inputs.github-token }}
