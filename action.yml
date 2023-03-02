@@ -14,11 +14,11 @@ inputs:
 runs:
   using: 'composite'
   steps:
+  - if: github.event_name == "pull_request"
+    run: exit 1
   - run: |
-      set -x
-      [[ "$GITHUB_EVENT_NAME" == "pull_request" ]] || exit 1
       PR_NUMBER=$(echo "$GITHUB_REF" | cut -d '/' -f3)
-      # limited to 100 file changes fix: https://github.com/cli/cli/issues/1393
+      # https://github.com/cli/cli/issues/1393
       gh pr -R "${GITHUB_REPOSITORY}" view "${PR_NUMBER}" --json files --jq '.files.[].path' \
         | grep -qv "^${TERRAFORM_DIR}" && echo "skip=true"|| echo "skip=false" >> $GITHUB_OUTPUT
     shell: bash
