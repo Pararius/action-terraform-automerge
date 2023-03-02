@@ -11,6 +11,7 @@ runs:
   using: 'composite'
   steps:
   - run: |
+      set -x
       # todo. check that this is a pr and skip (or fail) other workflow events
       pr_number=$(echo "$GIHUB_REF" | cut -d '/' -f3)
       gh pr -R "${GIHUB_REPOSITORY}" view "${pr_number}" --json files --jq '.files.[].path' \
