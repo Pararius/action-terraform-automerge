@@ -12,13 +12,14 @@ runs:
   steps:
   - run: |
       set -x
-      # todo. check that this is a pr and skip (or fail) other workflow events
+      [[ "$GITHUB_EVENT_NAME" == "pull" ]] || exit 1
       pr_number=$(echo "$GITHUB_REF" | cut -d '/' -f3)
       gh pr -R "${GITHUB_REPOSITORY}" view "${pr_number}" --json files --jq '.files.[].path' \
         | grep -qv "^${TERRAFORM_DIR}" && echo "skip=true"|| echo "skip=false" >> $GITHUB_OUTPUT
     shell: bash
     id: check
     env:
+      GITHUB_EVENT_NAME: ${{ github.event_name }}
       GITHUB_REPOSITORY: ${{ github.repository }}
       GITHUB_REF: ${{ github.ref }}
       GITHUB_TOKEN: ${{ inputs.github-token }}
