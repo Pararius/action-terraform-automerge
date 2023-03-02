@@ -15,7 +15,7 @@ runs:
       # todo. check that this is a pr and skip (or fail) other workflow events
       pr_number=$(echo "$GITHUB_REF" | cut -d '/' -f3)
       gh pr -R "${GITHUB_REPOSITORY}" view "${pr_number}" --json files --jq '.files.[].path' \
-        | grep -qo "^${TERRAFORM_DIR}" && echo "skip=false"|| echo "skip=false" >> $GITHUB_OUTPUT
+        | grep -qv "^${TERRAFORM_DIR}" && echo "skip=true"|| echo "skip=false" >> $GITHUB_OUTPUT
     shell: bash
     id: check
     env:
