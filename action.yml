@@ -4,8 +4,8 @@ inputs:
   github-token:
     description: 'Github token of the bot used for the auto-approving'
     required: true
-  terraform-directory:
-    description: 'Root directory for the terraform files e.g. terraform/'
+  terraform-directories:
+    description: 'Comma seperated list of terraform code directories e.g. terraform/prod, terraform/staging'
     required: true
   merge:
     description: 'Enable auto-merging'
@@ -24,14 +24,15 @@ runs:
   # get changed files inside pr (limited to 100 per request, but dependabot PRs are small so who cares)
   - run: |
       PR_NUMBER=$(echo "$GITHUB_REF" | cut -d '/' -f3)
-      TERRAFORM_DIR=$(echo "$TERRAFORM_DIR" | sed 's@\(\./\|/\)@@g')
+      REGEX=$(echo "$TERRAFORM_DIRS" | sed -E 's@(\./|/$)@@g' | sed -E 's@/,@,@g' | sed 's@,@|@g')
+      echo "$REGEX"
       gh pr -R "${GITHUB_REPOSITORY}" view "${PR_NUMBER}" --json files --jq '.files.[].path' \
-        | grep -qv "^${TERRAFORM_DIR}/" || echo "skip=false" >> $GITHUB_OUTPUT
+        | grep -Eqv "^(${REGEX})/" || echo "skip=false" >> $GITHUB_OUTPUT
     shell: bash
     id: check
     env:
       GITHUB_TOKEN: ${{ inputs.github-token }}
-      TERRAFORM_DIR: ${{ inputs.terraform-directory }}
+      TERRAFORM_DIRS: ${{ inputs.terraform-directories }}
   # download artifact created by pararius/action-terraform
   - uses: actions/download-artifact@v3
     if: steps.check.outputs.skip == 'false'
