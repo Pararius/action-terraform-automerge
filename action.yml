@@ -24,8 +24,9 @@ runs:
   # get changed files inside pr (limited to 100 per request, but dependabot PRs are small so who cares)
   - run: |
       PR_NUMBER=$(echo "$GITHUB_REF" | cut -d '/' -f3)
+      TERRAFORM_DIR=$(echo "$TERRAFORM_DIR" | sed 's@\(\./\|/\)@@g')
       gh pr -R "${GITHUB_REPOSITORY}" view "${PR_NUMBER}" --json files --jq '.files.[].path' \
-        | grep -qv "^${${TERRAFORM_DIR%/}##./}/" || echo "skip=false" >> $GITHUB_OUTPUT
+        | grep -qv "^${TERRAFORM_DIR}/" || echo "skip=false" >> $GITHUB_OUTPUT
     shell: bash
     id: check
     env:
