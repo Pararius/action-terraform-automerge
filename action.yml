@@ -49,10 +49,12 @@ runs:
     with:
       github-token: ${{ inputs.github-token }}
   # merge based on summary step output
-  - if: (inputs.merge || inputs.force-merge) && steps.summary.outputs.has_changes == 'false'
+  - if: (inputs.merge || inputs.force-merge) #&& steps.summary.outputs.has_changes == 'false'
     run: |
       PR_NUMBER=$(echo "$GITHUB_REF" | cut -d '/' -f3)
-      gh pr -R "${GITHUB_REPOSITORY}" merge "${PR_NUMBER}" -s `[[ "$USE_ADMIN" == "true" ]] && echo '--admin'`
+      echo "merging $GITHUB_REPOSITORY:$PR_NUMBER"
+      [[ "$USE_ADMIN" == "true" ]] && echo "with --admin"
+      #gh pr -R "${GITHUB_REPOSITORY}" merge "${PR_NUMBER}" -s `[[ "$USE_ADMIN" == "true" ]] && echo '--admin'`
     shell: bash
     env:
       USE_ADMIN: ${{ inputs.force-merge }}
