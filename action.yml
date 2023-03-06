@@ -34,18 +34,18 @@ runs:
       TERRAFORM_DIR: ${{ inputs.terraform-directory }}
   # download artifact created by pararius/action-terraform
   - uses: actions/download-artifact@v3
-    if: steps.check.outputs.skip == 'false'
+    #if: steps.check.outputs.skip == 'false'
     with:
       name: terraform
       path: summary
   # output true if any state in inputs.terraform-directory changed
   - id: summary
-    if: steps.check.outputs.skip == 'false'
+    #if: steps.check.outputs.skip == 'false'
     shell: bash
     run: cat summary/terraform/*.summary | grep 'true' || echo "has_changes=false" >> $GITHUB_OUTPUT
   # approve based on summary step ouptput
   - uses: hmarr/auto-approve-action@v3
-    if: steps.summary.outputs.has_changes == 'false'
+    #if: steps.summary.outputs.has_changes == 'false'
     with:
       github-token: ${{ inputs.github-token }}
   # merge based on summary step output
