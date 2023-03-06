@@ -6,7 +6,7 @@ inputs:
     required: true
   terraform-directories:
     description: 'Comma seperated list of terraform code directories e.g. terraform/prod, terraform/staging'
-    required: true
+    required: false
     default: 'terraform/'
   merge:
     description: 'Enable auto-merging'
