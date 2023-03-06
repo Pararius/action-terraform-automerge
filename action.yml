@@ -27,7 +27,7 @@ runs:
       REGEX=$(echo "$TERRAFORM_DIRS" | sed -E 's@(\./|/$)@@g' | sed -E 's@/,@,@g' | sed 's@,@|@g')
       echo "$REGEX"
       gh pr -R "${GITHUB_REPOSITORY}" view "${PR_NUMBER}" --json files --jq '.files.[].path' \
-        | grep -Eqv "^(${REGEX})" || echo "skip=false" >> $GITHUB_OUTPUT
+        | grep -Eqv "^(${REGEX})/" || echo "skip=false" >> $GITHUB_OUTPUT
     shell: bash
     id: check
     env:
