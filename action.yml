@@ -44,7 +44,7 @@ runs:
   - id: summary
     if: steps.check.outputs.skip == 'false'
     shell: bash
-    run: cat summary/terraform/*.summary | grep 'true' || echo "has_changes=false" >> $GITHUB_OUTPUT
+    run: (cat summary/terraform.*.summary || echo "No summary files found!" && exit 1) | grep 'true' || echo "has_changes=false" >> $GITHUB_OUTPUT
   # approve based on summary step ouptput
   - uses: hmarr/auto-approve-action@v3
     if: steps.summary.outputs.has_changes == 'false'
