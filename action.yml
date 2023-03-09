@@ -54,7 +54,7 @@ runs:
   - if: (inputs.merge || inputs.force-merge) && steps.summary.outputs.has_changes == 'false'
     run: |
       PR_NUMBER=$(echo "$GITHUB_REF" | cut -d '/' -f3)
-      gh pr -R "${GITHUB_REPOSITORY}" merge "${PR_NUMBER}" -s `[[ "$USE_ADMIN" == "true" ]] && echo '--admin'`
+      gh pr -R "${GITHUB_REPOSITORY}" merge "${PR_NUMBER}" -s `[[ "$USE_ADMIN" == "true" ]] && echo '--admin' || echo '--auto'`
     shell: bash
     env:
       USE_ADMIN: ${{ inputs.force-merge }}
