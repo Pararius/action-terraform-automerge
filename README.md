@@ -1,5 +1,7 @@
 Used together with [action-terraform](https://github.com/Pararius/action-terraform) for auto-approving (and merging) of pull request created by Dependabot
 
+**If the only changes are in `terraform-directory` and this action does not find any artifacts created by `action-terraform` (skipped maybe) it will still approve and merge**
+
 Example usage:
 
 ```yaml
@@ -25,3 +27,4 @@ Example usage:
           terraform-directory: 'terraform/'
           merge: true
 ```
+
