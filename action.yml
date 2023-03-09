@@ -42,16 +42,16 @@ runs:
       path: summary
   # output true if any state in inputs.terraform-directory changed
   - id: summary
-    if: steps.check.outputs.skip == 'false'
+    if: (success() || failure()) && steps.check.outputs.skip == 'false'
     shell: bash
-    run: (cat summary/terraform.*.summary || echo "No summary files found!" && exit 1) | grep 'true' || echo "has_changes=false" >> $GITHUB_OUTPUT
+    run: (cat summary/terraform.*.summary || true) | grep 'true' || echo "has_changes=false" >> $GITHUB_OUTPUT
   # approve based on summary step ouptput
   - uses: hmarr/auto-approve-action@v3
-    if: steps.summary.outputs.has_changes == 'false'
+    if: (success() || failure()) && steps.summary.outputs.has_changes == 'false'
     with:
       github-token: ${{ inputs.github-token }}
   # merge based on summary step output
-  - if: (inputs.merge || inputs.force-merge) && steps.summary.outputs.has_changes == 'false'
+  - if: (success() || failure()) && (inputs.merge || inputs.force-merge) && steps.summary.outputs.has_changes == 'false'
     run: |
       PR_NUMBER=$(echo "$GITHUB_REF" | cut -d '/' -f3)
       gh pr -R "${GITHUB_REPOSITORY}" merge "${PR_NUMBER}" -s `[[ "$USE_ADMIN" == "true" ]] && echo '--admin' || echo '--auto'`
